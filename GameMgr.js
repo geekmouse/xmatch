@@ -20,10 +20,10 @@ var g_config = {
 	,gridTop:150
 
 	//暂停目录按钮坐标
-	,pauseBtLeft0:65
-	,pauseBtLeft1:270
-	,pauseBtTop0:460
-	,pauseBtTop1:560
+	,pauseBtLeft0:45
+	,pauseBtLeft1:260
+	,pauseBtTop0:200
+	,pauseBtTop1:300
 
 	//pos for step-tutorials
 	,stBtShowLeft:70
@@ -40,9 +40,11 @@ var g_config = {
 	//zorder
 	,zorder:{
 		GameBG:10
-		,GameObject:20
-		,GameBottom:25
+		,GameBottom:20
+		,GameObject:25
+		,GameMask:28
 		,GameTip:30
+		,GameTouch:35
 		,GameUI:40
 		,GamePause:50
 		,GameTut:1000
@@ -64,10 +66,7 @@ var g_config = {
 	,callBackPara:{
 		empty:0							//无参数,继续游戏
 		,restartGame:1		//开始游戏
-	},
-
-	
-	
+	},	
 };
 
 var g_tools = {
@@ -174,11 +173,11 @@ var g_gameMgr = {
 		{x:4,y:1,c:10},
 	],		
 	st_steps:[//Step tutorial
-		{x:1,y:3,t:"<p>Click the space between the same tiles to form their sum.</p><p>Two other tiles will be generated after each move</p>"},//1
-		{x:3,y:3,t:"<p>3 tiles follows the same rule.</p><p>(eg. 2+2+2=6)</p>"},//2
-		{x:1,y:4,t:"<p>4 tiles with double-double numbers also follows the rule.</p><p>(eg. 2+2+1+1=6)</p>"},//3
-		{x:3,y:4,t:"<p>When the sum>=10, it turns into an 'x'.</p><p>(eg. 6+6=12, it's >10 and turns to x)</p>"},//4
-		{x:3,y:1,t:"<p>Perform an 'X-Match' to score!</p><p>An 'X-Match' move won't generate new tiles</p>"},//5
+		{x:1,y:3,t:"Click any empty tile between same tiles to form their sum.</br>2 other tiles are generated after each move."},//1
+		{x:3,y:3,t:"A 3-tiles move follows the same rule.</br>(eg. 2+2+2=6)"},//2
+		{x:1,y:4,t:"A 4-tiles move with double-double numbers is great.</br>(eg. 2+2+1+1=6)"},//3
+		{x:3,y:4,t:"When the sum>=10, it turns into an 'x'.</br>(eg. 6+6=12, it's >10 and turns to x)"},//4
+		{x:3,y:1,t:"Perform an 'X-Match' to score!</br>An 'X-Match' move won't generate new tiles."},//5
 	],
 	st_tut_Mask:[
 		{l:0,t:3,r:5,b:3},

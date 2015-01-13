@@ -112,7 +112,11 @@ var GameScene = {
 		    var height = $(window).height();
 		    var l_zoomH=height/960;
 		    var l_zoomW=width/640;
-		      $("body").css("zoom",l_zoomH<l_zoomW?l_zoomH:l_zoomW);
+		    var l_zoomThis=l_zoomH<l_zoomW?l_zoomH:l_zoomW;
+		      $("body").css({
+		      	"zoom":l_zoomThis
+		      	,"-moz-transform":"scale("+l_zoomThis+")"
+		  });
 			cc.log("windowSize:("+width+","+height+")"); 
 		}
 	},
@@ -134,6 +138,8 @@ var GameScene = {
 					"left":l_pnt.x
 					,"top":l_pnt.y
 					,"background-color":l_strColor
+					,"z-index":g_config.zorder.GameBG
+					//,"clip":"rect(0px 10px 40px 0px)"
 				});
 
 				$("#grid_layer").append("<div class='grid' id='bg_"+i+""+j+"_click'></div>");
@@ -142,8 +148,8 @@ var GameScene = {
 					,"top":l_pnt.y
 					,"background-color":"#003085"
 					,"opacity":"0"
-					,"filter":"alpha(opacity=50)"
-					,"z-index":g_config.zorder.GameTip+1
+					,"filter":"alpha(opacity=0)"
+					,"z-index":g_config.zorder.GameTouch
 				});
 			}
 		}
@@ -208,16 +214,16 @@ var GameScene = {
 	showStepTut:function(){
 		this.loseControl();
 		var l_gameScene=this;
-		$("#game_scene").append("<div id='st_ask_bg' class='st_ask_bg'></div>");
-		$("#st_ask_bg").append("<div id='st_ask_words' class='st_ask_words'>Are you sure you want to QUIT for the tutorial? You’ll lose your current progress </div>");
-		$("#st_ask_bg").append("<div id='st_bt_show' class='st_bt'>YES</div>");
+		$("#game_scene").append("<div id='st_ask_bg' class='view_bk st_ask_bg'></div>");
+		$("#st_ask_bg").append("<div id='st_ask_words' class='view_text st_ask_words'>Are you sure you want to QUIT for the tutorial? You’ll lose your current progress </div>");
+		$("#st_ask_bg").append("<div id='st_bt_show' class='view_bt st_bt'>YES</div>");
 		$("#st_bt_show").css({"left":g_config.stBtShowLeft}).click(function(event) {
 			l_gameScene.initRandomMap(true);
 			l_gameScene.onControl();
 			$("#st_ask_bg").remove();
 		});
 
-		$("#st_ask_bg").append("<div id='st_bt_cancel' class='st_bt'>NO</div>");
+		$("#st_ask_bg").append("<div id='st_bt_cancel' class='view_bt st_bt'>NO</div>");
 		$("#st_bt_cancel").css({"left":g_config.stBtCancelLeft}).click(function(event) {
 			l_gameScene.onControl();
 			$("#st_ask_bg").remove();
@@ -240,6 +246,20 @@ var GameScene = {
 				var l_thisBrick=g_gameMgr.st_bricks[i];
 				this.addBrick(l_thisBrick.c,cc.p(l_thisBrick.x,l_thisBrick.y));
 			};
+			for (var i = 0; i < g_config.gridCount_y; i++) {
+				for(var j = 0; j < g_config.gridCount_x; j++){
+					var l_pnt=g_gameMgr.getPositionByGrid(cc.p(j,i));
+					$("#grid_layer").append("<div class='grid' id='bg_"+i+""+j+"_mask'></div>");
+					$("#bg_"+i+""+j+"_mask").css({
+						"left":l_pnt.x
+						,"top":l_pnt.y
+						,"background-color":"#003085"
+						,"opacity":"0"
+						,"filter":"alpha(opacity=0)"
+						,"z-index":g_config.zorder.GameMask
+					});
+				}
+			}
 			this.showStepTutTip(g_gameMgr.st_steps[0]);
 
 		}
@@ -317,8 +337,11 @@ var GameScene = {
 		g_gameMgr.addBrick(l_gameBrick, p_gridPoint);
 
 		$("#brick_layer").append("<div class='brick_back' id='"+l_strIDBrick+"'></div>");
-		$("#"+l_strIDBrick).css("left", l_gameBrick.leftOriginal);
-		$("#"+l_strIDBrick).css("top", l_gameBrick.topOriginal);
+		$("#"+l_strIDBrick).css({
+			"left":l_gameBrick.leftOriginal
+			,"top":l_gameBrick.topOriginal
+			,"z-index":g_config.zorder.GameObject
+		});
 
 
 		var l_strColor = g_gameMgr.brickColors[p_iNum];
@@ -387,6 +410,11 @@ var GameScene = {
 					this.showStepTutTip(l_newStep);
 				}
 				else{
+					for (var i = 0; i < g_config.gridCount_y; i++) {
+						for(var j = 0; j < g_config.gridCount_x; j++){
+							$("#bg_"+i+""+j+"_mask").remove();
+						}
+					}
 					$("#st_arrow").remove();
 					$("#st_text").remove();
 					this.showViewTarget();
@@ -447,7 +475,7 @@ var GameScene = {
 	//不能点击动画
 	showForbid:function(p_gridPoint){
 		var l_position = g_gameMgr.getPositionByGrid(p_gridPoint);
-		$("#game_scene").append("<img id='forbid' class='st_arrow' src='res/forbid.png'/>");
+		$("#game_scene").append("<img id='forbid' class='click_tip' src='res/forbid.png'/>");
 		$("#forbid").css({
 				"left" : l_position.x,
 				"top" : l_position.y,
@@ -462,15 +490,18 @@ var GameScene = {
 		);
 	},
 
+
 	showStepTutTip:function(p_tutStep){
 		var l_pntTip=cc.p(p_tutStep.x,p_tutStep.y);
 		var l_position = g_gameMgr.getPositionByGrid(l_pntTip);
 		$("#st_arrow").remove();
-		$("#game_scene").append("<img id='st_arrow' class='st_arrow' src='res/mxArrow.png'/>");
+		$("#game_scene").append("<img id='st_arrow' class='click_tip' src='/res/mxArrow.png'/>");
 		$("#st_arrow").css({
 			"left" : l_position.x,
-			"top" : l_position.y,
-		});
+			"top" : l_position.y-40,
+			"z-index":g_config.zorder.GameTip
+		}).unbind();
+		this._tutTipLoop();
 		//Put in Mask
 		this._toggleMask(true);
 
@@ -485,9 +516,16 @@ var GameScene = {
 			
 		var l_text=p_tutStep.t;
 		$("#st_text").remove();
-		$("#game_scene").append("<div id='st_text' class='st_text'>"+l_text+"</div>");
-
+		$("#game_scene").append("<div id='st_text' class='view_bk view_text st_text'><span style='color:red;'><p>Tutorial</p></span><p>"+l_text+"</p></div>");
 		
+	},
+
+	_tutTipLoop:function(){
+		var l_arrow=jQuery("#st_arrow")[0];
+		if (l_arrow) {
+			$("#st_arrow").animate({top:'+=10px'},300);
+			$("#st_arrow").animate({top:'-=10px'},300,GameScene._tutTipLoop);
+		}
 	},
 
 	_toggleMask:function(pOn){
@@ -500,7 +538,7 @@ var GameScene = {
 	},
 
 	_toggleMaskBrick:function(p_Posi,pOn){
-		$("#bg_"+p_Posi.y+""+p_Posi.x+"_click").css({
+		$("#bg_"+p_Posi.y+""+p_Posi.x+"_mask").css({
 			"opacity":pOn?"0.8":"0.0",
 			"filter:":pOn?"alpha(opacity=80)":"alpha(opacity=0)",
 		});
@@ -567,7 +605,7 @@ var GameScene = {
 
 		var l_btY=810;
 		var l_btXInt=100;
-		var l_startX=5;
+		var l_startX=250;
 		//FB按钮
 		$("#game_ui").append("<img id='bt_fb' src='res/mxIconFB.png'></img>");
 		$("#bt_fb").addClass("bt_sns").css({left: l_startX,top: l_btY}).click(function(event){
@@ -599,6 +637,9 @@ var GameScene = {
 				window.open("mailto:geek.mouse.game@gmail.com?subject=X-MATCH Feedback");
 			}
 		});
+
+		$("#game_ui").append("<div id= 'contact'>CONTACT US</div>");
+
 	}
 	
 	//更新回合
